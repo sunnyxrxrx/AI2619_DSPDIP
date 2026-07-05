@@ -10,29 +10,9 @@ from scipy.sparse.linalg import spsolve
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
-
-def _read_grayscale_float64(img_path: str) -> np.ndarray:
-    try:
-        import cv2  # type: ignore
-
-        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        if img is None:
-            raise ValueError(f"Failed to read image: {img_path}")
-        img_f = img.astype(np.float64)
-        if img_f.max() > 1.0:
-            img_f /= 255.0
-        return np.clip(img_f, 0.0, 1.0)
-    except Exception:
-        img = mpimg.imread(img_path)
-        if img.ndim == 3:
-            img = img[..., 0]
-        img_f = img.astype(np.float64)
-        if img_f.max() > 1.0:
-            img_f /= 255.0
-        return np.clip(img_f, 0.0, 1.0)
+from utils import _read_grayscale_float64
 
 
 def _forward_gradients(s: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -138,8 +118,8 @@ def toy_reconstruct(img_path: str, output_dir: str) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--img_path", type=str, default="poisson_toy_reconstruction.png")
-    parser.add_argument("--output_dir", type=str, default="results")
+    parser.add_argument("--img_path", type=str, default="figs/poisson_toy_reconstruction.png")
+    parser.add_argument("--output_dir", type=str, default="results/results_toy_reconstruction")
     args = parser.parse_args()
 
     metrics = toy_reconstruct(args.img_path, args.output_dir)

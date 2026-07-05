@@ -1,0 +1,4 @@
+*backup/
+prompts/
+.vscode/
+__pycache__/

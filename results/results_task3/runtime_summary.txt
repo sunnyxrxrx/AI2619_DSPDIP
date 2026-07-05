@@ -1,0 +1,2 @@
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.234492, solve_time_s=1.448475
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.234492, solve_time_s=1.492248
