@@ -1,0 +1,187 @@
+
+
+===== Page 1 / 5 =====
+
+AI2619 Digital Signal and Image Processing - Course Project
+第 1 页
+ AI2619 数字信号与图像处理大作业
+ Poisson Image Editing 核心方法复现与分析
+一、项目说明
+本项目为个人作业，围绕论文 Poisson Image Editing 展开。目标是复现论文中最核心的梯度域编辑方法：guided
+interpolation、importing gradients 和 mixing gradients。
+论文还包含 texture flattening、local illumination changes、local color changes 和 seamless tiling 等扩展工具，本作业不
+要求完整复现这些扩展内容。
+二、指定素材
+本目录已提供以下图片。请使用这些图片作为主要输入，所有像素计算时归一化到 [0, 1]。
+poisson_toy_reconstruction.png
+warm-up 输入
+poisson_source.png
+源图
+poisson_target.png
+目标图
+poisson_mask.png
+二值 mask
+三、核心公式要求
+●
+对 mask 区域 W 内的每个像素 p 建立未知量。使用 4-connected neighbors。
+●
+下面公式中，f 为待求融合图像，f* 为目标图像，g 为源图像，v 为 guidance field。
+●
+注意边方向和符号需在实现中保持一致。
+●
+mixed gradients 中，对每条边和每个 RGB 通道分别选择 source 与 target 中绝对值更大的梯度。
+四、实验内容
+
+
+===== Page 2 / 5 =====
+
+AI2619 Digital Signal and Image Processing - Course Project
+第 2 页
+实验 A：Warm-up: Toy Gradient Reconstruction
+●
+输入：poisson_toy_reconstruction.png。
+●
+计算图像的水平和垂直前向差分梯度，并只使用梯度场与边界像素重建图像。
+●
+本实验不是论文原实验，而是用于检查 Poisson 线性系统构建和边界条件是否正确。
+●
+输出：原图、重建图、绝对误差图；计算 MSE、PSNR、max absolute error。
+
+
+===== Page 3 / 5 =====
+
+AI2619 Digital Signal and Image Processing - Course Project
+第 3 页
+实验 B：Core Reproduction: Seamless Cloning
+●
+输入：poisson_source.png、poisson_target.png、poisson_mask.png。
+●
+复现论文 importing gradients：在 mask 区域内使用 source 的梯度作为 guidance field，在 mask 边界处使用 target 像
+素作为 Dirichlet boundary condition。
+●
+分别对 R、G、B 三个通道求解同一个稀疏线性系统，得到融合结果。
+●
+输出：普通 copy-paste 结果、Poisson seamless cloning 结果、边界局部放大图。
+实验 C：Core Reproduction: Mixed Gradients
+●
+仍使用实验 B 的三张图。
+●
+复现论文 mixing gradients：对每条边和每个通道，选择 source 与 target 中绝对值更大的梯度作为 guidance field。
+●
+输出：copy-paste、source-gradient Poisson、mixed-gradient Poisson 三种结果；至少给出两个局部放大区域。
+●
+分析 mixed gradients 对目标图纹理、源图边缘和边界自然度的影响。
+实验 D：Analysis Extension: Failure Cases
+●
+本实验是分析扩展，不是论文原实验。
+●
+案例 1：将 source 图像亮度乘以 1.8 后再进行 seamless cloning，并与原始结果对比。
+●
+案例 2：将 mask 先膨胀 25 个像素后再进行 seamless cloning，并与原始 mask 结果对比。
+●
+输出两个失败案例的结果图和局部放大图，解释亮度差异、边界选择和梯度场冲突为什么会导致不自然结果。
+五、实现要求
+1
+主结果必须来自自己构建的 Poisson 方程和线性系统。可以使用 NumPy/SciPy 求解稀疏线性系统；禁止直接调
+用 OpenCV seamlessClone 或其他现成 Poisson blending 函数作为主结果。
+2
+mask 内每个像素对应一个未知量。请建立二维像素坐标到线性系统 index 的映射，并使用稀疏矩阵存储系数。
+3
+RGB 图像需逐通道求解。矩阵 A 对三个通道相同，右端项 b 不同。
+4
+报告中必须包含方程、边界条件、矩阵规模、非零元素数量、求解器名称和运行时间。
+5
+可以使用生成式模型辅助理解、写作或代码调试，但需在报告中说明使用方式；图像编辑模型结果不能替代
+上述实验。
+六、提交内容
+1
+实验报告 PDF：建议 7-10 页。鼓励使用 LaTeX 排版，鼓励使用英文写作；中文或英文均可。
+2
+源代码：包含清晰入口文件，可按 README 步骤复现实验结果。建议目录包含 src/、results/、report/。
+3
+结果图像：报告中的所有结果图应保存到 results/，并能由代码生成。
+4
+README：说明依赖、运行命令、输出位置、求解器和外部工具使用情况。
+七、报告结构
+ 部分
+ 建议内容
+1. Paper Summary
+概括论文目标、guided interpolation、importing gradients 和 mixing gradients。说明未复现的扩展
+工具。
+2. Formulation
+写出连续形式与离散形式，明确 guidance field、mixed gradient 选择规则和边界条件。
+3. Implementation
+说明像素编号、稀疏矩阵构造、RGB 通道求解、求解器、复杂度和运行时间。
+4. Experiments A-C
+展示 warm-up、seamless cloning、mixed gradients 的输入、输出和局部放大对比。
+5. Failure Analysis
+展示两个扩展失败案例，解释亮度差异、mask 边界和梯度冲突造成的问题。
+6. Conclusion
+总结 Poisson editing 核心方法的优势、局限，以及和普通 copy-paste 的区别。
+八、评分标准
+
+
+===== Page 4 / 5 =====
+
+AI2619 Digital Signal and Image Processing - Course Project
+第 4 页
+ 项目
+ 分值
+ 评分细则
+论文理解与核心建模
+20
+论文核心目标 3；guided interpolation 4；离散方程 5；guidance field 符号和边界条件 4；说
+明未复现扩展内容 4。
+实验 A
+10
+梯度计算 2；线性系统构建 4；边界条件 2；误差图和指标 2。
+实验 B
+25
+mask 内像素编号 4；稀疏矩阵构造 6；RGB 三通道求解 4；copy-paste 对比 3；边界局部
+放大 3；结果自然度分析 5。
+实验 C
+20
+逐通道 mixed gradient 选择规则 6；实现正确 6；与 source-gradient 对比 4；局部细节分析
+4。
+实验 D
+10
+亮度扰动案例 3；mask 膨胀案例 3；失败原因解释 4。
+报告与代码规范
+15
+报告结构 3；公式/图表/引用规范 3；运行时间和矩阵信息 3；代码可复现 3；英文写作
+或 LaTeX 排版质量 3。
+总分 100 分。本作业评价的是论文核心方法复现质量，不要求完整复现论文所有扩展工具。
+
+
+===== Page 5 / 5 =====
+
+AI2619 Digital Signal and Image Processing - Course Project
+第 5 页
+九、结果表格模板
+Experiment
+ Input
+ Method
+ Unknowns
+ nnz(A)
+ Runtime
+ Metric / Observation
+A
+toy
+gradient reconstruction
+MSE, PSNR, max error
+B
+source/target/mask
+source-gradient Poisson
+boundary quality
+C
+source/target/mask
+mixed gradients
+local detail comparison
+D
+brightness/mask
+perturbation
+failure case
+failure explanation
+十、学术诚信
+可以参考公开资料、论文实现和工具文档，但需在报告中注明来源。不得直接提交他人完整项目或无法解释的代
+码。若使用生成式模型辅助写作、编程或图像编辑，请在报告中简要说明使用方式。
