@@ -4,7 +4,7 @@ matplotlib.use("Agg")
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Optional, Tuple
 
 def _read_grayscale_float64(img_path: str) -> np.ndarray:
     try:
@@ -207,24 +207,27 @@ def save_global_comparison(
 def save_zoom_comparison(
     naive_img: np.ndarray,
     seamless_img: np.ndarray,
-    mixed_img: np.ndarray,
+    mixed_img: Optional[np.ndarray],
     center: Tuple[int, int],
     half_size: int,
     out_path: str,
     title: str,
 ) -> None:
     '''
-    保存局部放大对比图：在同一块局部区域内对比三种方法的效果。
+    保存局部放大对比图：在同一块局部区域内对比两/三种方法的效果。
 
     说明：
     - center 表示局部区域中心 (cy, cx)
     - half_size 表示半边长，裁剪窗口为 [cy-half_size, cy+half_size) × [cx-half_size, cx+half_size)
-    - 三幅图按 (naive, seamless, mixed) 顺序横向排布
+    - 若 mixed_img 不为 None：三幅图按 (naive, seamless, mixed) 顺序横向排布
+    - 若 mixed_img 为 None：两幅图按 (naive, seamless) 顺序横向排布
 
     Parameters
     ----------
-    naive_img, seamless_img, mixed_img: (H, W, 3) float64
-        三种方法的结果图。
+    naive_img, seamless_img: (H, W, 3) float64
+        两种方法的结果图。
+    mixed_img: (H, W, 3) float64 | None
+        Mixed-gradient Poisson 结果图；若为 None，则只绘制 naive 与 seamless 的两图对比。
     center: (cy, cx)
         局部区域中心坐标（像素坐标，y 在前）。
     half_size: int
@@ -238,12 +241,16 @@ def save_zoom_comparison(
     cy, cx = center
     y0, y1, x0, x1 = _crop_box_centered(h, w, cy, cx, half_size)
 
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4), dpi=200)
-    for ax, img, t in zip(
-        axes,
-        (naive_img, seamless_img, mixed_img),
-        ("Naive Copy-Paste", "Source-gradient Poisson", "Mixed-gradient Poisson"),
-    ):
+    if mixed_img is None:
+        fig, axes = plt.subplots(1, 2, figsize=(8, 4), dpi=200)
+        imgs = (naive_img, seamless_img)
+        titles = ("Naive Copy-Paste", "Source-gradient Poisson")
+    else:
+        fig, axes = plt.subplots(1, 3, figsize=(12, 4), dpi=200)
+        imgs = (naive_img, seamless_img, mixed_img)
+        titles = ("Naive Copy-Paste", "Source-gradient Poisson", "Mixed-gradient Poisson")
+
+    for ax, img, t in zip(axes, imgs, titles):
         ax.imshow(np.clip(img[y0:y1, x0:x1, :], 0.0, 1.0))
         ax.set_title(t)
         ax.axis("off")

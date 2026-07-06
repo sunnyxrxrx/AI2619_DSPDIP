@@ -3,3 +3,5 @@ prompts/
 .vscode/
 __pycache__/
 report.md
+results_opencv/
+opencv_seamless*
