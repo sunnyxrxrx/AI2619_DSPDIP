@@ -41,6 +41,8 @@ python poisson_failure_cases.py
 
 Outputs are saved under the corresponding `results/`.
 
+For visualization of gradient attenuation after brightness scaling, run ``delta_gradient.py``.
+
 ## Solvers and External Tools
 
 - Linear solver: `scipy.sparse.linalg.spsolve` is used to solve the sparse linear system (SciPy’s direct sparse solver, typically backed by SuperLU).
