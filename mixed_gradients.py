@@ -7,7 +7,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from utils import save_global_comparison, save_zoom_comparison, naive_copy_paste, _choose_zoom_centers, _write_text
-from poison_cloner import PoissonCloner
+from Possion.poisson_cloner import PoissonCloner
 
 
 def main() -> None:
@@ -42,6 +42,7 @@ def main() -> None:
     # 【给分点B.5：边界局部放大】
     # 【给分点C.4：局部细节分析，结合报告】
     center1, center2 = _choose_zoom_centers(cloner.src, cloner.target, cloner.mask)
+    print(center1, center2)
     save_zoom_comparison(
         naive,
         seamless,

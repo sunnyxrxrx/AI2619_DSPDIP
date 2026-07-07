@@ -1,6 +1,7 @@
 import argparse
 import math
 import os
+import time
 from typing import Tuple
 
 import numpy as np
@@ -12,7 +13,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from utils import _read_grayscale_float64
+from utils import _read_grayscale_float64, _write_text
 
 
 def _forward_gradients(s: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -40,6 +41,7 @@ def toy_reconstruct(img_path: str, output_dir: str) -> dict:
     h, w = s.shape
     n = h * w
 
+    t_build0 = time.perf_counter()
     gx, gy = _forward_gradients(s)
     div_g = _divergence_backward(gx, gy)
 
@@ -78,7 +80,11 @@ def toy_reconstruct(img_path: str, output_dir: str) -> dict:
         raise RuntimeError(f"nnz mismatch: filled={k}, expected={nnz}")
 
     a = sp.coo_matrix((data, (rows, cols)), shape=(n, n)).tocsr()
+    build_time_s = float(time.perf_counter() - t_build0)
+
+    t_solve0 = time.perf_counter()
     v = spsolve(a, b).astype(np.float64)
+    solve_time_s = float(time.perf_counter() - t_solve0)
     v_img = v.reshape(h, w)
 
     diff = s - v_img
@@ -90,22 +96,57 @@ def toy_reconstruct(img_path: str, output_dir: str) -> dict:
     max_abs_error = float(np.max(np.abs(diff)))
 
     os.makedirs(output_dir, exist_ok=True)
-    plt.imsave(os.path.join(output_dir, "original.png"), s, cmap="gray", vmin=0.0, vmax=1.0)
-    plt.imsave(
-        os.path.join(output_dir, "reconstructed.png"),
-        np.clip(v_img, 0.0, 1.0),
-        cmap="gray",
-        vmin=0.0,
-        vmax=1.0,
-    )
+
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5), dpi=150)
+    ax.imshow(s, cmap="gray", vmin=0.0, vmax=1.0)
+    ax.set_title("Original (Grayscale, 0–1)")
+    ax.axis("off")
+    fig.tight_layout()
+    fig.savefig(os.path.join(output_dir, "original.png"), bbox_inches="tight")
+    plt.close(fig)
+
+    fig, ax = plt.subplots(1, 1, figsize=(5, 5), dpi=150)
+    ax.imshow(np.clip(v_img, 0.0, 1.0), cmap="gray", vmin=0.0, vmax=1.0)
+    ax.set_title("Reconstructed (Grayscale, 0–1)")
+    ax.axis("off")
+    fig.tight_layout()
+    fig.savefig(os.path.join(output_dir, "reconstructed.png"), bbox_inches="tight")
+    plt.close(fig)
+
     vmax_err = max(max_abs_error, 1e-12)
-    plt.imsave(
-        os.path.join(output_dir, "abs_error.png"),
-        np.abs(diff),
-        cmap="viridis",
-        vmin=0.0,
-        vmax=vmax_err,
+    fig, ax = plt.subplots(1, 1, figsize=(5.5, 5), dpi=150)
+    im = ax.imshow(np.abs(diff), cmap="viridis", vmin=0.0, vmax=vmax_err)
+    ax.set_title("Absolute Error (Normalized Intensity)")
+    ax.axis("off")
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Absolute error (0–1)")
+    fig.tight_layout()
+    fig.savefig(os.path.join(output_dir, "abs_error.png"), bbox_inches="tight")
+    plt.close(fig)
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5), dpi=150)
+    axes[0].imshow(s, cmap="gray", vmin=0.0, vmax=1.0)
+    axes[0].set_title("Original (Grayscale, 0–1)")
+    axes[0].axis("off")
+
+    axes[1].imshow(np.clip(v_img, 0.0, 1.0), cmap="gray", vmin=0.0, vmax=1.0)
+    axes[1].set_title("Reconstructed (Grayscale, 0–1)")
+    axes[1].axis("off")
+
+    im = axes[2].imshow(np.abs(diff), cmap="viridis", vmin=0.0, vmax=vmax_err)
+    axes[2].set_title("Absolute Error (Normalized Intensity)")
+    axes[2].axis("off")
+    cbar = fig.colorbar(im, ax=axes[2], fraction=0.046, pad=0.04)
+    cbar.set_label("Absolute error (0–1)")
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(output_dir, "comparison.png"), bbox_inches="tight")
+    plt.close(fig)
+
+    summary = "Toy Reconstruction: N={n}, nnz(A)={nnz}, build_time_s={bt:.6f}, solve_time_s={st:.6f}".format(
+        n=n, nnz=int(nnz), bt=build_time_s, st=solve_time_s
     )
+    _write_text(os.path.join(output_dir, "runtime_summary.txt"), summary + "\n", append=True)
 
     return {
         "mse": mse,
@@ -113,6 +154,10 @@ def toy_reconstruct(img_path: str, output_dir: str) -> dict:
         "max_abs_error": max_abs_error,
         "height": h,
         "width": w,
+        "n_unknowns": n,
+        "nnz": int(nnz),
+        "build_time_s": build_time_s,
+        "solve_time_s": solve_time_s,
     }
 
 
@@ -130,6 +175,14 @@ def main() -> None:
             mae=metrics["max_abs_error"],
             h=metrics["height"],
             w=metrics["width"],
+        )
+    )
+    print(
+        "N={n}, nnz(A)={nnz}, build_time_s={bt:.6f}, solve_time_s={st:.6f}".format(
+            n=metrics["n_unknowns"],
+            nnz=metrics["nnz"],
+            bt=metrics["build_time_s"],
+            st=metrics["solve_time_s"],
         )
     )
 

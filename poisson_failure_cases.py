@@ -9,9 +9,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from poison_cloner import PoissonCloner
+from Possion.poisson_cloner import PoissonCloner
 from utils import _read_color_float64, _read_mask_bool, naive_copy_paste
-from utils import _save_color, _save_mask_png, _save_side_by_side, _save_crop_compare, _write_text
+from utils import _save_color, _save_mask_png, _save_side_by_side, _write_text
+from utils import save_zoom_comparison, _choose_zoom_centers
 
 
 
@@ -100,25 +101,27 @@ def main() -> None:
         os.path.join(args.output_dir, "case1_global_compare.png"),
     )
 
-    box_boundary = _mask_bbox(mask, margin=int(args.zoom_margin))
-    box_center = _crop_center(mask, half_size=int(args.zoom_half_size))
-    _save_crop_compare(
+    center1, center2 = _choose_zoom_centers(src, target, mask)
+    panel_titles_1 = ("Baseline Poisson", "Brightness x{:.2f}".format(args.brightness_scale))
+    save_zoom_comparison(
         poisson_base,
         poisson_bright,
-        box_boundary,
-        "Baseline Poisson",
-        "Brightness x{:.2f}".format(args.brightness_scale),
-        os.path.join(args.output_dir, "case1_zoom_boundary.png"),
-        "Case 1 Zoom: Boundary Area",
+        mixed_img=None,
+        center=center2,
+        half_size=int(args.zoom_half_size),
+        out_path=os.path.join(args.output_dir, "case1_zoom_boundary.png"),
+        title="Case 1 Zoom Area",
+        panel_titles=panel_titles_1,
     )
-    _save_crop_compare(
+    save_zoom_comparison(
         poisson_base,
         poisson_bright,
-        box_center,
-        "Baseline Poisson",
-        "Brightness x{:.2f}".format(args.brightness_scale),
-        os.path.join(args.output_dir, "case1_zoom_inside.png"),
-        "Case 1 Zoom: Inside Area",
+        mixed_img=None,
+        center=center1,
+        half_size=int(args.zoom_half_size),
+        out_path=os.path.join(args.output_dir, "case1_zoom_inside.png"),
+        title="Case 1 Zoom Area",
+        panel_titles=panel_titles_1,
     )
 
     from scipy.ndimage import binary_dilation
@@ -141,25 +144,27 @@ def main() -> None:
         os.path.join(args.output_dir, "case2_global_compare.png"),
     )
 
-    box_boundary2 = _mask_bbox(dilated, margin=int(args.zoom_margin))
-    box_center2 = _crop_center(dilated, half_size=int(args.zoom_half_size))
-    _save_crop_compare(
+    center1_2, center2_2 = _choose_zoom_centers(src, target, dilated)
+    panel_titles_2 = ("Baseline Poisson", "Dilated Mask {}px".format(args.dilate_iters))
+    save_zoom_comparison(
         poisson_base,
         poisson_dilated,
-        box_boundary2,
-        "Baseline Poisson",
-        "Dilated Mask {}px".format(args.dilate_iters),
-        os.path.join(args.output_dir, "case2_zoom_boundary.png"),
-        "Case 2 Zoom: Boundary Area",
+        mixed_img=None,
+        center=center2_2,
+        half_size=int(args.zoom_half_size),
+        out_path=os.path.join(args.output_dir, "case2_zoom_boundary.png"),
+        title="Case 2 Zoom Area",
+        panel_titles=panel_titles_2,
     )
-    _save_crop_compare(
+    save_zoom_comparison(
         poisson_base,
         poisson_dilated,
-        box_center2,
-        "Baseline Poisson",
-        "Dilated Mask {}px".format(args.dilate_iters),
-        os.path.join(args.output_dir, "case2_zoom_inside.png"),
-        "Case 2 Zoom: Inside Area",
+        mixed_img=None,
+        center=center1_2,
+        half_size=int(args.zoom_half_size),
+        out_path=os.path.join(args.output_dir, "case2_zoom_inside.png"),
+        title="Case 2 Zoom Area",
+        panel_titles=panel_titles_2,
     )
 
     summary = []

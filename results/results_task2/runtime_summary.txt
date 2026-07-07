@@ -3,3 +3,4 @@ Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.244316, solve_
 Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.199290, solve_time_s=1.340693
 Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.237125, solve_time_s=1.459888
 Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.243299, solve_time_s=1.467532
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.232707, solve_time_s=1.477729

@@ -1,2 +1,14 @@
 Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.234492, solve_time_s=1.448475
 Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.234492, solve_time_s=1.492248
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.235111, solve_time_s=1.379629
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.235111, solve_time_s=1.497596
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.241944, solve_time_s=1.445729
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.241944, solve_time_s=1.546546
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.256135, solve_time_s=1.486250
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.256135, solve_time_s=1.451325
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.232961, solve_time_s=1.407768
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.232961, solve_time_s=1.487970
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.231830, solve_time_s=1.416928
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.231830, solve_time_s=1.485298
+Seamless(source-gradient): N=48283, nnz(A)=240423, build_time_s=0.226617, solve_time_s=1.393926
+Mixed-gradients: N=48283, nnz(A)=240423, build_time_s=0.226617, solve_time_s=1.486870

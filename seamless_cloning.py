@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from utils import naive_copy_paste, save_zoom_comparison, _choose_zoom_centers, _write_text
-from poison_cloner import PoissonCloner
+from Possion.poisson_cloner import PoissonCloner
 
 
 def main() -> None:

@@ -1,3 +1,9 @@
 Baseline: N=48283, nnz(A)=240423, build_time_s=0.244093, solve_time_s=1.381235
 Case1 (brightness x1.80): N=48283, nnz(A)=240423, build_time_s=0.227194, solve_time_s=1.371244
 Case2 (dilate 25px): N=75583, nnz(A)=376723, build_time_s=0.387668, solve_time_s=2.392051
+Baseline: N=48283, nnz(A)=240423, build_time_s=0.246146, solve_time_s=1.451312
+Case1 (brightness x1.80): N=48283, nnz(A)=240423, build_time_s=0.226723, solve_time_s=1.429832
+Case2 (dilate 25px): N=75583, nnz(A)=376723, build_time_s=0.368274, solve_time_s=2.387080
+Baseline: N=48283, nnz(A)=240423, build_time_s=0.227932, solve_time_s=1.396581
+Case1 (brightness x1.80): N=48283, nnz(A)=240423, build_time_s=0.227808, solve_time_s=1.407823
+Case2 (dilate 25px): N=75583, nnz(A)=376723, build_time_s=0.373186, solve_time_s=2.338679

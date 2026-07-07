@@ -162,11 +162,11 @@ def _choose_zoom_centers(
             score_b[y, x] = s
         y2, x2 = np.unravel_index(int(np.argmax(score_b)), score_b.shape)
 
-    return (int(y1), int(x1)), (int(y2), int(x2))
+    return (int(y1), int(x1)), (int(y2+10), int(x2+10))
 
 
 def save_global_comparison(
-    naive_img: np.ndarray,
+    naive_img: Optional[np.ndarray],
     seamless_img: np.ndarray,
     mixed_img: np.ndarray,
     out_path: str,
@@ -186,18 +186,27 @@ def save_global_comparison(
     out_path: str
         输出路径（.png 等）。
     '''
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5), dpi=150)
-    axes[0].imshow(np.clip(naive_img, 0.0, 1.0))
-    axes[0].set_title("Naive Copy-Paste")
-    axes[0].axis("off")
+    if naive_img is None:
+        fig, axes = plt.subplots(1, 2, figsize=(10, 5), dpi=150)
+        axes[0].imshow(np.clip(seamless_img, 0.0, 1.0))
+        axes[0].set_title("Source-gradient Poisson")    
+        axes[0].axis("off")
+        axes[1].imshow(np.clip(mixed_img, 0.0, 1.0))
+        axes[1].set_title("Mixed-gradient Poisson")
+        axes[1].axis("off")
+    else:
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5), dpi=150)
+        axes[0].imshow(np.clip(naive_img, 0.0, 1.0))
+        axes[0].set_title("Naive Copy-Paste")
+        axes[0].axis("off")
 
-    axes[1].imshow(np.clip(seamless_img, 0.0, 1.0))
-    axes[1].set_title("Source-gradient Poisson")
-    axes[1].axis("off")
+        axes[1].imshow(np.clip(seamless_img, 0.0, 1.0))
+        axes[1].set_title("Source-gradient Poisson")
+        axes[1].axis("off")
 
-    axes[2].imshow(np.clip(mixed_img, 0.0, 1.0))
-    axes[2].set_title("Mixed-gradient Poisson")
-    axes[2].axis("off")
+        axes[2].imshow(np.clip(mixed_img, 0.0, 1.0))
+        axes[2].set_title("Mixed-gradient Poisson")
+        axes[2].axis("off")
 
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
@@ -205,13 +214,14 @@ def save_global_comparison(
 
 
 def save_zoom_comparison(
-    naive_img: np.ndarray,
+    naive_img: Optional[np.ndarray],
     seamless_img: np.ndarray,
     mixed_img: Optional[np.ndarray],
     center: Tuple[int, int],
     half_size: int,
     out_path: str,
     title: str,
+    panel_titles: Optional[Tuple[str, ...]] = None,
 ) -> None:
     '''
     保存局部放大对比图：在同一块局部区域内对比两/三种方法的效果。
@@ -236,25 +246,37 @@ def save_zoom_comparison(
         输出路径。
     title: str
         图标题（用于报告描述局部区域用途）。
+    panel_titles: tuple[str, ...] | None
+        子图标题；若为 None，则使用默认标题。长度必须与实际绘制子图数量一致。
     '''
-    h, w = naive_img.shape[:2]
+    h, w = seamless_img.shape[:2]
     cy, cx = center
     y0, y1, x0, x1 = _crop_box_centered(h, w, cy, cx, half_size)
 
     if mixed_img is None:
+        if naive_img is None:
+            raise ValueError("naive_img must not be None when mixed_img is None")
         fig, axes = plt.subplots(1, 2, figsize=(8, 4), dpi=200)
         imgs = (naive_img, seamless_img)
-        titles = ("Naive Copy-Paste", "Source-gradient Poisson")
+        default_titles = ("Naive Copy-Paste", "Source-gradient Poisson")
+    elif naive_img is None:
+        fig, axes = plt.subplots(1, 2, figsize=(8, 4), dpi=200)
+        imgs = (seamless_img, mixed_img)
+        default_titles = ("Source-gradient Poisson", "Mixed-gradient Poisson")
     else:
         fig, axes = plt.subplots(1, 3, figsize=(12, 4), dpi=200)
         imgs = (naive_img, seamless_img, mixed_img)
-        titles = ("Naive Copy-Paste", "Source-gradient Poisson", "Mixed-gradient Poisson")
+        default_titles = ("Naive Copy-Paste", "Source-gradient Poisson", "Mixed-gradient Poisson")
+
+    titles = default_titles if panel_titles is None else panel_titles
+    if len(titles) != len(imgs):
+        raise ValueError("panel_titles length must match number of plotted panels")
 
     for ax, img, t in zip(axes, imgs, titles):
         ax.imshow(np.clip(img[y0:y1, x0:x1, :], 0.0, 1.0))
         ax.set_title(t)
         ax.axis("off")
-    fig.suptitle(title)
+    # fig.suptitle(title)
     fig.tight_layout()
     fig.savefig(out_path, bbox_inches="tight")
     plt.close(fig)
