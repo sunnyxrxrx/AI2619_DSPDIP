@@ -3,7 +3,7 @@ Final project of SJTU 2026 Spring AI2619: Digital Signal and Image Processing.
 
 This project implements classic [Poisson image editing](https://www.cs.jhu.edu/~misha/Fall07/Papers/Perez03.pdf), including seamless cloning and mixed-gradient blending.
 
-The Poisson system construction and solving are unified in [poisson_cloner.py](https://github.com/sunnyxrxrx/AI2619_DSPDIP/blob/main/poisson_cloner.py) via the `PoissonCloner` class.
+The Poisson system construction and solving are unified in `poisson_cloner.py` via the `PoissonCloner` class.
 
 ## Features
 
@@ -41,3 +41,12 @@ python poisson_failure_cases.py
 
 Outputs are saved under the corresponding `results/`.
 
+## Solvers and External Tools
+
+- Linear solver: `scipy.sparse.linalg.spsolve` is used to solve the sparse linear system (SciPy’s direct sparse solver, typically backed by SuperLU).
+- Sparse matrices: matrices are assembled in COO format and converted to CSR (`scipy.sparse.coo_matrix(...).tocsr()`) for efficient solving.
+- Image I/O:
+  - Prefer OpenCV (`opencv-python`) when available for reading images/masks.
+  - Fallback to `matplotlib.image.imread` if OpenCV is not available.
+- Visualization: Matplotlib with the `Agg` backend 
+- Morphology: `scipy.ndimage.binary_dilation` is used for mask dilation experiments.
